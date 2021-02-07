@@ -2,6 +2,14 @@
 
 This project use Elasticsearch, Kibana, Fluentd and Nodejs project, I use the NodeJs project to create logs.
 
+> Elasticsearch 3 Master and 2 Data Nodes
+
+>Kibana for log monitor
+
+>Fluetnd for collecting
+
+>App is log generate
+
 ![](images/efk.png)
 
 **You have to create dockerfile for NodeJS**
