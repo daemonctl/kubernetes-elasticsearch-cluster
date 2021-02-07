@@ -75,9 +75,7 @@ Appliaction is sending "Hello Kubernetes"
 ```
 Now master pod is es-cluster-0. Delete the tagged master pod. Cluster re-deploy a new one instead of the deleted pod. So New master node es-cluset-1.
 http://elasticsearch.k8s.com/_cat/nodes?v 
-
-![](images/master-remove2.png)
-
 ```
+![](images/master-remove2.png)
 
 You can see dashboard via browser @octocat :+1:
