@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: efk-master
+  namespace: logging
+data:
+  CLUSTER_NAME: "elk-k8s"
+  ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+  DISCOVERY.SEED_HOSTS: "es-cluster-0.elasticsearch,es-cluster-1.elasticsearch,es-cluster-2.elasticsearch"
+  CLUSTER.INITAL_MASTER_NODES: "es-cluster-0,es-cluster-1,es-cluster-2"
+  NODE.MAX_LOCAL_STRORAGE_NODES: "5"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: efk-data1
+  namespace: logging
+data:
+  CLUSTER_NAME: "elk-k8s"
+  ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+  DISCOVERY.SEED_HOSTS: "es-cluster-0.elasticsearch,es-cluster-1.elasticsearch,es-cluster-2.elasticsearch"
+  CLUSTER.INITAL_MASTER_NODES: "es-cluster-0,es-cluster-1,es-cluster-2"
+  NODE_MASTER: "false"
+  NODE_DATA: "true"
+  NODE.MAX_LOCAL_STRORAGE_NODES: "5"

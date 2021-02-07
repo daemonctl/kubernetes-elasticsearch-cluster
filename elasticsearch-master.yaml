@@ -1,0 +1,109 @@
+#http://elasticsearch.k8s.com/
+#http://elasticsearch.k8s.com/_cat/nodes?v
+#http://elasticsearch.k8s.com/_cluster/state?pretty
+#sysctl -w vm.max_map_count=262144
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es-cluster
+  namespace: logging
+spec:
+  serviceName: elasticsearch
+  replicas: 3
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+        role: master
+    spec:
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
+        env:
+          - name: node.name
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: cluster.name
+            valueFrom:
+              configMapKeyRef:
+                name: efk-master
+                key: CLUSTER_NAME       
+          - name: ES_JAVA_OPTS
+            valueFrom:
+              configMapKeyRef:
+                name: efk-master
+                key: ES_JAVA_OPTS
+          - name: discovery.seed_hosts
+            valueFrom:
+              configMapKeyRef:
+                name: efk-master
+                key: DISCOVERY.SEED_HOSTS
+          - name: cluster.initial_master_nodes
+            valueFrom:
+              configMapKeyRef:
+                name: efk-master
+                key: CLUSTER.INITAL_MASTER_NODES
+          - name: node.max_local_storage_nodes
+            valueFrom:
+              configMapKeyRef:
+                key: NODE.MAX_LOCAL_STRORAGE_NODES
+                name: efk-master    
+        resources:
+          limits:
+            memory: 2Gi
+            cpu: 1000m
+          requests:
+            memory: 2Gi
+            cpu: 100m
+        ports:
+          - name: client
+            containerPort: 9200
+          - name: nodes
+            containerPort: 9300
+        volumeMounts:
+          - name: data
+            mountPath: /usr/share/elasticsearch/data
+      volumes:
+        - name: data
+          hostPath:
+            path: /home/docker/data
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: logging
+spec:
+  type: NodePort
+  selector:
+    app: elasticsearch
+  ports:
+    - name: client
+      port: 9200
+      targetPort: 9200
+    - name: nodes
+      port: 9300
+      targetPort: 9300
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: elasticsearchingress-master
+  namespace: logging
+spec:
+  rules:
+  - host: elasticsearch.k8s.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: elasticsearch
+            port:
+              number: 9200
